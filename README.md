@@ -6,3 +6,5 @@ A google script is created seperately and the Web url of the spreadsheet is used
 The script is not created from the spreadsheet so the linkage is not automatic. 
 
 The first Sheet is named "APIPULL" and it is referenced in the script code. The other sheet is for collecting past data and plotting charts. Its name does not matter. 
+
+The Script does not require any account access, the data is available from public APIs. 
