@@ -1,0 +1,79 @@
+function myPoloLTCLoans() {
+  
+  // Link the script with a spreadsheet using the unique identifier found in the spreadsheet web address
+  var ss = SpreadsheetApp.openById('SPREEDSHEET ID');
+  
+  var APIPullSheet = ss.getSheetByName("APIPull");
+  
+  // Clear Columns A, B, C & D
+  APIPullSheet.getRange('A2:D19999').clearContent();
+  
+  // Pull the JSON data and parse it
+  var url = "https://poloniex.com/public?command=returnLoanOrders&currency=LTC";
+  var responseAPI = UrlFetchApp.fetch(url);
+  var parcedData = JSON.parse(responseAPI.getContentText());
+  
+  // Define the 'offers' array, and populate it from the parced data pulled
+  var offers = [];
+  offers.push(['offerRate', 'offerAmount', 'rangeMin', 'rangeMax']);
+
+  
+  for(var key in parcedData.offers)
+    {
+      //var test = [];
+     // test = [parcedData.offers.rate[key],parcedData.offers.amount[key], parcedData.offers.rangeMin[key], parcedData.offers.rangeMax[key]] 
+      offers.push([parcedData.offers[key].rate,parcedData.offers[key].amount, parcedData.offers[key].rangeMin, parcedData.offers[key].rangeMax]);
+    }
+ 
+  // Put the 'offers' data into the spreadsheet columns A & B
+  askRange = APIPullSheet.getRange(1, 1, offers.length, 4);
+  
+  askRange.setValues(offers)
+  
+ 
+  // Append Latest Data to End of the File
+  var tableData = ss.getSheetByName("History");
+  var rangeData = tableData.getRange("A3:G3");  
+  var latestData = rangeData.getValues();  
+  tableData.appendRow(latestData[0]);   // Put the data at the bottom of the spreadsheet
+ 
+  // Keep 144 rows - Delete any extra starting at row 2
+  var rowsToKeep = 500;   // 144 * 10 Minutes = 24 Hours of Data
+  var totalRows = tableData.getLastRow();
+  
+  var numToDelete = totalRows - rowsToKeep;
+  
+  if (numToDelete > 0)
+     {
+         tableData.deleteRows(8, numToDelete);  // Purge Extra Rows        
+     }
+  
+    // Get Comparison Data to monitor for Email
+ // var ChartSheet = ss.getSheetByName("Chart");
+ // var maxBid = ChartSheet.getRange("E5").getDisplayValue();
+  
+  //get median rate, min and max rates
+  var currentRate = tableData.getRange("E3").getDisplayValue();
+  var minRate = tableData.getRange("F3").getDisplayValue();
+  var maxRate = tableData.getRange("C3").getDisplayValue();
+  var totalOffer = tableData.getRange("B3").getDisplayValue();
+  
+  // Send Email if criteria met
+  if (currentRate > 0.02) {
+    var subject = "Poloniex LTC loan median rate alert ";
+    
+    // creating a text message
+    var message = "Current Minimum Rate: " + minRate + "%\n" +
+      
+    "Current Median Rate: " + currentRate + "%\n" +
+ 
+    "Current Maximum Rate: " + maxRate + "%\n" +
+      
+    "Total offers from top 50 offerings: " + totalOffer + "ltc\n" +  
+ 
+   
+    MailApp.sendEmail("EMAIL ADDRESS", subject, message);
+    }
+  
+ 
+}
