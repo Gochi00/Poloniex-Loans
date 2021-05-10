@@ -1,5 +1,5 @@
 # Poloniex-Loans
-An old script for Google Scripts to access Poloniex loan data. 
+An old script for Google Scripts to access Poloniex loan data. I did not create this myself, most of it is copied online, from a source i cannot recall. 
 
 I started by opening an Excel Spreadsheetm and created 2 sheets inside. 
 A google script is created seperately and the Web url of the spreadsheet is used in the script to link the script with the spreadsheet. 
